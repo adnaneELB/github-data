@@ -1,31 +1,26 @@
-name: Conditional Job Execution based on Folder Changes
+name: Paths Filter Example
 
-on:
-  push:
-    branches:
-      - main
+on: [push, workflow_dispatch]
 
 jobs:
-  jobA:
+  paths-filter:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && contains(github.event.commits[*].added, 'src/**') || contains(github.event.commits[*].modified, 'src/**') }}
+    outputs:
+      output1: ${{ steps.filter.outputs.workflows }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      # Add steps for job A
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          workflows:
+            - '.github/workflows/**'
+    # run only if 'workflows' files were changed
+    - name: workflow tests
+      if: steps.filter.outputs.workflows == 'true'
+      run: echo "Workflow file"
 
-  jobB:
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && contains(github.event.commits[*].added, 'b/') || contains(github.event.commits[*].modified, 'b/') }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      # Add steps for job B
-
-  jobC:
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && (contains(github.event.commits[*].added, 'c/') || contains(github.event.commits[*].modified, 'c/')) }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      # Add steps for job C
+    # run only if not 'workflows' files were changed
+    - name: not workflow tests
+      if: steps.filter.outputs.workflows != 'true'
+      run: echo "NOT workflow file"
