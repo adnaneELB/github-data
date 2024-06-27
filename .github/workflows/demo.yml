@@ -20,6 +20,8 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      index_css_changed: ${{ steps.check_changes.outputs.index_css_changed }}
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -27,6 +29,15 @@ jobs:
         run: npm ci
       - name: Build website
         run: npm run build
+      - name: Check if src/index.css has changed
+        id: check_changes
+        run: |
+          git fetch origin main
+          if git diff --name-only HEAD^ HEAD | grep -q '^src/index.css$'; then
+            echo "::set-output name=index_css_changed::true"
+          else
+            echo "::set-output name=index_css_changed::false"
+          fi
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -35,19 +46,15 @@ jobs:
 
   deploy:
     needs: build
+    if: needs.build.outputs.index_css_changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Get code
         uses: actions/checkout@v3
-      - name: Check if src/index.css has changed
-        id: check_changes
-        run: |
-          git fetch origin main
-          if git diff --name-only HEAD^ HEAD | grep -q '^src/index.css$'; then
-            echo "index_css_changed=true" >> $GITHUB_ENV
-          else
-            echo "index_css_changed=false" >> $GITHUB_ENV
-          fi
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-files
+          path: dist
       - name: Deploy
-        if: env.index_css_changed == 'true'
         run: echo "Deploying..."
