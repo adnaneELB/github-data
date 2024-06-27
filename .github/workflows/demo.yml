@@ -1,26 +1,42 @@
-name: Paths Filter Example
+name: CI Workflow
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      - main  # Replace with your branch name if needed
 
 jobs:
-  paths-filter:
+  # JOB to run change detection
+  changes:
     runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
     outputs:
-      output1: ${{ steps.filter.outputs.workflows }}
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: dorny/paths-filter@v3
-      id: filter
-      with:
-        filters: |
-          workflows:
-            - '.src/**'
-    # run only if 'workflows' files were changed
-    - name: workflow tests
-      if: steps.filter.outputs.workflows == 'true'
-      run: echo "Workflow file"
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'src/**'
+            frontend:
+              - 'frontend/**'
 
-    # run only if not 'workflows' files were changed
-    - name: not workflow tests
-      if: steps.filter.outputs.workflows != 'true'
-      run: echo "NOT workflow file"
+  # JOB to build and test backend code
+  backend:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+
+  # JOB to build and test frontend code
+  frontend:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
