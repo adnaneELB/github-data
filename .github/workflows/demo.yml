@@ -1,16 +1,10 @@
 name: Deploy website
-
 on:
   push:
     branches:
       - main
-    paths:
-      - 'src/front/**'
-      - 'src/back/**'
-
 jobs:
   test:
-    if: ${{github.event.head_commit.message}}.contains('github/workflows/demo.yml')
     runs-on: ubuntu-latest
     steps:
       - name: Get code
@@ -21,8 +15,9 @@ jobs:
         run: npm run lint
       - name: Test code
         run: npm run test
-
   build:
+    needs: test
+    if: ${{github.event.head_commit.message}}.contains('github/workflows/demo.yml')
     runs-on: ubuntu-latest
     steps:
       - name: Get code
@@ -36,3 +31,9 @@ jobs:
         with:
           name: dist-files
           path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        run: echo "Deploying..."
