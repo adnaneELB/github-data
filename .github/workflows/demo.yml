@@ -1,53 +1,31 @@
-name: Deploy website
+name: Conditional Job Execution based on Folder Changes
+
 on:
   push:
     branches:
       - main
 
 jobs:
-  test:
+  jobA:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && contains(github.event.commits[*].added, 'src/**') || contains(github.event.commits[*].modified, 'src/**') }}
     steps:
-      - name: Get code
-        uses: actions/checkout@v3
-      - name: Install dependencies
-        run: npm ci
-      - name: Lint code
-        run: npm run lint
-      - name: Test code
-        run: npm run test
-        
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get code
-        uses: actions/checkout@v3
-      - name: Install dependencies
-        run: npm ci
-      - name: Build website
-        run: npm run build
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: dist-files
-          path: dist
+      - name: Checkout code
+        uses: actions/checkout@v2
+      # Add steps for job A
 
-  deploy:
-    needs: build
+  jobB:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && contains(github.event.commits[*].added, 'b/') || contains(github.event.commits[*].modified, 'b/') }}
     steps:
-      - name: Get code
-        uses: actions/checkout@v3
-      - name: Check if src/index.css has changed
-        id: check_changes
-        run: |
-          git fetch origin main
-          if git diff --name-only HEAD^ HEAD | grep -q '^src/index.css$'; then
-            echo "index_css_changed=true" >> $GITHUB_ENV
-          else
-            echo "index_css_changed=false" >> $GITHUB_ENV
-          fi
-      - name: Deploy
-        if: env.index_css_changed == 'true'
-        run: echo "Deploying..."
+      - name: Checkout code
+        uses: actions/checkout@v2
+      # Add steps for job B
+
+  jobC:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && (contains(github.event.commits[*].added, 'c/') || contains(github.event.commits[*].modified, 'c/')) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      # Add steps for job C
