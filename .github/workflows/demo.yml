@@ -8,6 +8,11 @@ on:
       - .github/workflows/demo.yml
       - src/**
   workflow_dispatch:
+    inputs:
+      job_name:
+        description: 'Name of the job to run'
+        required: true
+        default: 'job1'
 jobs:
   # JOB to run change detection
   changes:
@@ -31,7 +36,7 @@ jobs:
   # JOB to build and test backend code
   backend:
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' }}
+    if: ${{ needs.changes.outputs.backend == 'true' && github.event.inputs.job_name == 'job1' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
