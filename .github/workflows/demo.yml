@@ -10,12 +10,12 @@ on:
   workflow_dispatch:
     inputs:
       run_frontend:
-        description: 'Run Job 1'
+        description: 'Run frontend'
         type: boolean
         required: true
         default: false
       run_backend:
-        description: 'Run Job 2'
+        description: 'Run backend'
         type: boolean
         required: true
         default: false
