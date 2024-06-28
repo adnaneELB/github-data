@@ -9,10 +9,16 @@ on:
       - src/**
   workflow_dispatch:
     inputs:
-      job_name:
-        description: 'Name of the job to run'
+      run_job1:
+        description: 'Run Job 1'
+        type: boolean
         required: true
-        default: 'job1'
+        default: false
+      run_job2:
+        description: 'Run Job 2'
+        type: boolean
+        required: true
+        default: false
 jobs:
   # JOB to run change detection
   changes:
@@ -36,7 +42,7 @@ jobs:
   # JOB to build and test backend code
   backend:
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' && github.event.inputs.job_name == 'job1' }}
+    if: ${{ needs.changes.outputs.backend == 'true' && github.event.inputs.run_job1}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
