@@ -51,7 +51,7 @@ jobs:
   # JOB to build and test frontend code
   frontend:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend == 'true' && github.event.inputs.run_job1 == 'false'}}
+    if: ${{ needs.changes.outputs.frontend == 'true' && github.event.inputs.run_job2 == 'true'}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
