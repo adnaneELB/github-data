@@ -9,12 +9,12 @@ on:
       - src/**
   workflow_dispatch:
     inputs:
-      run_job1:
+      run_frontend:
         description: 'Run Job 1'
         type: boolean
         required: true
         default: false
-      run_job2:
+      run_backend:
         description: 'Run Job 2'
         type: boolean
         required: true
@@ -42,7 +42,7 @@ jobs:
   # JOB to build and test backend code
   backend:
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' && github.event.inputs.run_job1 == 'true'}}
+    if: ${{ needs.changes.outputs.backend == 'true' && github.event.inputs.run_frontend == 'true'}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,7 +51,7 @@ jobs:
   # JOB to build and test frontend code
   frontend:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend == 'true' && github.event.inputs.run_job2 == 'true'}}
+    if: ${{ needs.changes.outputs.frontend == 'true' && github.event.inputs.run_backend == 'true'}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
