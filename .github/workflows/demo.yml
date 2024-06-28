@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/demo.yml
       - src/**
+  workflow_dispatch:
 jobs:
   # JOB to run change detection
   changes:
